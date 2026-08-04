@@ -1,0 +1,201 @@
+{
+  "info": {
+    "_postman_id": "7569e0bc-aec7-4c93-b4bd-c644f7d00e94",
+    "name": "New Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47908203",
+    "_collection_link": "https://go.postman.co/collection/47908203-7569e0bc-aec7-4c93-b4bd-c644f7d00e94?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Create a shortened URL​",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"originalUrl\" : \"https://drive.google.com/file/d/1GkpqWm-ZZN34YX37-Wv0GLTn1DFLEuZa/view?usp=sharing\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/url",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url"
+          ]
+        },
+        "description": "**Generates a unique short code for the provided original URL**"
+      },
+      "response": []
+    },
+    {
+      "name": "Redirect to original URL",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/url/GSK8ptqtfA",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url",
+            "GSK8ptqtfA"
+          ]
+        },
+        "description": "**Redirects the user to the original URL associated with the provided short code**"
+      },
+      "response": []
+    },
+    {
+      "name": "Get all shortened URLs",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"originalUrl\" : \"https://drive.google.com/file/d/1GkpqWm-ZZN34YX37-Wv0GLTn1DFLEuZa/view?usp=sharing\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/url",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url"
+          ]
+        },
+        "description": "Returns a list of all generated shortened URLs"
+      },
+      "response": []
+    },
+    {
+      "name": "Get URL visit count​",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"originalUrl\" : \"https://drive.google.com/file/d/1GkpqWm-ZZN34YX37-Wv0GLTn1DFLEuZa/view?usp=sharing\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/url/GSK8ptqtfA/visits",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url",
+            "GSK8ptqtfA",
+            "visits"
+          ]
+        },
+        "description": "**Returns the number of times a short URL has been accessed**"
+      },
+      "response": []
+    },
+    {
+      "name": "Get shortened URL details",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"originalUrl\" : \"https://drive.google.com/file/d/1GkpqWm-ZZN34YX37-Wv0GLTn1DFLEuZa/view?usp=sharing\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/url/GSK8ptqtfA/details",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url",
+            "GSK8ptqtfA",
+            "details"
+          ]
+        },
+        "description": "**Returns complete information about a shortened URL including creation date and visit count**"
+      },
+      "response": []
+    },
+    {
+      "name": "Update original URL",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"originalUrl\" : \"https://drive.google.com/file/d/1GkpqWm-ZZN34YX37-Wv0GLTn1DFLEuZa/view?usp=sharing\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/url/GSK8ptqtfA",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url",
+            "GSK8ptqtfA"
+          ]
+        },
+        "description": "**Updates the destination URL of an existing shortened URL**"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete shortened URL​",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"originalUrl\" : \"https://drive.google.com/file/d/1GkpqWm-ZZN34YX37-Wv0GLTn1DFLEuZa/view?usp=sharing\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/url/MhFC6ZpCh9",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "url",
+            "MhFC6ZpCh9"
+          ]
+        },
+        "description": "Deletes a shortened URL permanently using its short code."
+      },
+      "response": []
+    }
+  ]
+}
