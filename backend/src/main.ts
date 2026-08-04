@@ -26,7 +26,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   
   app.use(
-    '/v1/docs',
+    '/api/v1/docs',
     apiReference({
       spec: {
         content: document,
