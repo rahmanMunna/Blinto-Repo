@@ -16,8 +16,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         host: configService.get<string>('PG_HOST', 'localhost'),
         port: parseInt(configService.get<string>('PG_PORT', '5432'), 10),
         username: configService.get<string>('PG_USERNAME', 'postgres'),
-        password: configService.get<string>('PG_PASSWORD', '5850'),
-        database: configService.get<string>('PG_DATABASE', 'Blinto'),
+        password: configService.get<string>('PG_PASSWORD'),
+        database: configService.get<string>('PG_DATABASE'),
         autoLoadEntities: true,
         synchronize: true,
       })
