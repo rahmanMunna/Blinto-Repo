@@ -7,19 +7,23 @@ import {
   Patch,
   Post,
   Redirect,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UrlEntity } from './entity/url.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @ApiTags('URL Shortener')
 @Controller('url')
 export class UrlController {
 
-  constructor(private readonly urlService: UrlService) {}
+  constructor(private readonly urlService: UrlService) { }
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Post()
   @ApiOperation({
     summary: 'Create a shortened URL',
@@ -42,6 +46,8 @@ export class UrlController {
   }
 
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Get()
   @ApiOperation({
     summary: 'Get all shortened URLs',
@@ -57,6 +63,8 @@ export class UrlController {
   }
 
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Get(':shortCode')
   @Redirect('', 302)
   @ApiOperation({
@@ -88,7 +96,8 @@ export class UrlController {
     };
   }
 
-
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Get(':shortCode/visits')
   @ApiOperation({
     summary: 'Get URL visit count',
@@ -118,6 +127,8 @@ export class UrlController {
   }
 
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Get(':shortCode/details')
   @ApiOperation({
     summary: 'Get shortened URL details',
@@ -141,6 +152,8 @@ export class UrlController {
   }
 
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Patch(':shortCode')
   @ApiOperation({
     summary: 'Update original URL',
@@ -176,6 +189,8 @@ export class UrlController {
   }
 
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @Delete(':shortCode')
   @ApiOperation({
     summary: 'Delete shortened URL',
