@@ -93,4 +93,40 @@ export class UserService {
         return bcrypt.compare(plainPassword, hashedPassword);
     }
 
+    async findUserByEmail(email: string): Promise<UserEntity | null> {
+        const user = await this.userRepo.findOne({
+            where: {
+                email: email
+            }
+        })
+
+        return user;
+    }
+
+    async findUserByGoogleId(googleId: string): Promise<UserEntity | null> {
+        const user = await this.userRepo.findOne({
+            where: {
+                googleId: googleId
+            }
+        })
+
+        return user;
+    }
+
+    async createUserByGoogleSignIn(googleUser): Promise<UserEntity> {
+        let user = this.userRepo.create({
+            googleId: googleUser.googleId,
+            email: googleUser.email,
+            username: googleUser.email,
+            // firstName: googleUser.firstName,
+            // lastName: googleUser.lastName,
+            // avatar: googleUser.avatar,
+            password: null,
+            role: "guest",
+        });
+
+        return await this.userRepo.save(user);
+    }
+
+
 }

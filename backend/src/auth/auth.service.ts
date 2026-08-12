@@ -11,6 +11,7 @@ import { RegisterGuestDto } from './dto/register-guest.dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { UserEntity } from 'src/user/entity/user.entity';
 // import {configService} from '@nestjs/config' 
 
 @Injectable()
@@ -41,6 +42,7 @@ export class AuthService {
         if (!user) {
             throw new NotFoundException('user not found with this user name')
         }
+
 
         const isPassValid = await this.userService.IsValidatePassword(pass, user?.password);
 
@@ -108,12 +110,7 @@ export class AuthService {
         };
     }
 
-    async refreshAccessToken(
-        refreshToken: string,
-    ): Promise<{
-        access_token: string;
-        refresh_token: string;
-    }> {
+    async refreshAccessToken(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
         try {
             const payload =
                 await this.jwtService.verifyAsync(refreshToken, {
@@ -153,6 +150,56 @@ export class AuthService {
                 'Invalid or expired refresh token',
             );
         }
+    }
+
+    async googleLogin(googleUser: any) {
+
+        let user: UserEntity | null = await this.userService.findUserByGoogleId(googleUser.googleId);
+
+        // If Google account doesn't exist
+        if (!user) {
+            // Check whether email already exists
+            user = await this.userService.findUserByEmail(googleUser.email);
+        }
+
+        // Create new user
+        if (!user) {
+            user = await this.userService.createUserByGoogleSignIn(googleUser);
+        }
+
+        // Generate YOUR JWT
+        const payload = {
+            sub: user.id,
+            username: user.username,
+            role: user.role,
+        };
+
+        const access_token =
+            await this.jwtService.signAsync(payload, {
+                secret: this.configService.get<string>(
+                    "JWT_ACCESS_SECRET",
+                ),
+                expiresIn: "15m",
+            });
+
+        const refresh_token = await this.jwtService.signAsync(
+            {
+                sub: user.id,
+            },
+            {
+                secret: this.configService.get<string>(
+                    "JWT_REFRESH_SECRET",
+                ),
+                expiresIn: "7d",
+            },
+        );
+
+
+        return { access_token, refresh_token }
+
+        // return {
+        //     message: "Google login successful",
+        // };
     }
 
 }

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UrlEntity } from 'src/url/entity/url.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -9,6 +10,9 @@ export class UserEntity {
   })
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column({ nullable: true, unique: true })
+  googleId!: string | null;
 
   @ApiProperty({
     description: 'Unique username of the user',
@@ -39,10 +43,11 @@ export class UserEntity {
     example: '$2b$10$...',
   })
   @Column({
+    nullable: true,
     type: 'varchar',
     length: 256,
   })
-  password!: string;
+  password!: string | null;
 
   @ApiProperty({
     description: 'Role of the user in the system',
@@ -64,4 +69,9 @@ export class UserEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at!: Date;
+
+  // One user can have many URLs
+  @OneToMany(() => UrlEntity, (url) => url.user)
+  urls!: UrlEntity[];
+
 }

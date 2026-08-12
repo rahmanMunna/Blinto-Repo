@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UserEntity } from 'src/user/entity/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('urls')
 export class UrlEntity {
@@ -39,4 +40,12 @@ export class UrlEntity {
   })
   @Column({ type: 'int', default: 0 })
   visit_count!: number;
+
+  // Many URLs belong to one user
+  @ManyToOne(() => UserEntity, (user) => user.urls, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id' })
+  user!: UserEntity;
+
 }
