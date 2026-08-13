@@ -123,26 +123,40 @@ export class AuthController {
 
     @Get('google/callback')
     @UseGuards(GoogleAuthGuard)
-    async googleCallback(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-        const { access_token, refresh_token } = await this.authService.googleLogin(req.user);
-        // Store cookies
-        res.cookie("access_token", access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 15 * 60 * 1000,
-            path: "/",
-        });
+    async googleCallback(@Req() req: any, @Res() res: Response) {
+        const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3001';
 
-        res.cookie("refresh_token", refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            path: "/",
-        });
+        try {
+            const { access_token, refresh_token } = await this.authService.googleLogin(req.user);
+            // Store cookies
+            res.cookie("access_token", access_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 15 * 60 * 1000,
+                path: "/",
+            });
 
-        return { access_token, refresh_token };
+            res.cookie("refresh_token", refresh_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: "/",
+            });
+
+            // The AuthGuard reads the Authorization header, not these cookies, so
+            // hand the tokens to the frontend as well. A browser lands here by
+            // full page navigation and cannot read a JSON response, so redirect.
+            const params = new URLSearchParams({ access_token, refresh_token });
+
+            return res.redirect(`${frontendUrl}/auth/google/callback?${params.toString()}`);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Google sign-in failed';
+            const params = new URLSearchParams({ error: message });
+
+            return res.redirect(`${frontendUrl}/auth/google/callback?${params.toString()}`);
+        }
     }
 
 

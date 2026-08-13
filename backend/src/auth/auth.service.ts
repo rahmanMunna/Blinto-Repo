@@ -43,6 +43,9 @@ export class AuthService {
             throw new NotFoundException('user not found with this user name')
         }
 
+        if (!user.password) {
+            throw new UnauthorizedException("This account does not have a password. Please sign in with Google.");
+        }
 
         const isPassValid = await this.userService.IsValidatePassword(pass, user?.password);
 
