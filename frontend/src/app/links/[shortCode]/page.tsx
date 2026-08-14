@@ -14,7 +14,6 @@ function Details({ shortCode }: { shortCode: string }) {
   const [url, setUrl] = useState<ShortUrl | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [opening, setOpening] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -35,18 +34,9 @@ function Details({ shortCode }: { shortCode: string }) {
     void load();
   }, [load]);
 
-  async function open() {
-    setOpening(true);
-
-    try {
-      const destination = await urlApi.resolveAndOpen(shortCode);
-      window.open(destination, '_blank', 'noopener,noreferrer');
-      await load();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not open it.');
-    } finally {
-      setOpening(false);
-    }
+  /** The short link is public — follow it directly, then re-read the counter. */
+  function noteVisit() {
+    setTimeout(() => void load(), 900);
   }
 
   if (loading) {
@@ -95,15 +85,16 @@ function Details({ shortCode }: { shortCode: string }) {
 
       <div className="mt-7 flex flex-wrap gap-2">
         <CopyButton value={share} label="Copy short link" />
-        <button
-          type="button"
-          onClick={open}
-          disabled={opening}
+        <a
+          href={share}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={noteVisit}
           className="btn btn-primary"
         >
-          {opening ? <Spinner /> : <ExternalIcon className="h-4 w-4" />}
-          Open destination
-        </button>
+          <ExternalIcon className="h-4 w-4" />
+          Follow short link
+        </a>
       </div>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-3">

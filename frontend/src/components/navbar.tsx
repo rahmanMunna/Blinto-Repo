@@ -9,12 +9,15 @@ import { Brand } from './ui';
 
 const links = [
   { href: '/dashboard', label: 'My links' },
-  { href: '/explore', label: 'All links' },
+  { href: '/explore', label: 'Top links' },
 ];
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+
+  // A token is not guaranteed to carry a username, so never index into it blind.
+  const displayName = user?.username?.trim() || 'Account';
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-ink-950/70 backdrop-blur-xl">
@@ -51,13 +54,15 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="max-w-45 truncate text-sm font-medium">
-                {user.username}
+                {displayName}
               </p>
-              <p className="text-xs capitalize text-mist-600">{user.role}</p>
+              <p className="text-xs capitalize text-mist-600">
+                {user.role ?? 'guest'}
+              </p>
             </div>
 
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-sm font-semibold uppercase text-white">
-              {user.username.charAt(0)}
+              {displayName.charAt(0)}
             </span>
 
             <button

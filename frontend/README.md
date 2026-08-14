@@ -33,7 +33,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 | `/register` | public | Guest registration, then an automatic sign-in |
 | `/auth/google/callback` | public | Receives the token pair from the backend redirect |
 | `/dashboard` | required | Stats, create form, and the user's own links |
-| `/explore` | required | Every link on the server (`GET /url`), searchable |
+| `/explore` | required | Your links ranked by traffic (`GET /url`), searchable |
 | `/links/[shortCode]` | required | Full record for one short code |
 
 ## How auth works here
@@ -67,13 +67,15 @@ That last redirect required a change to `backend/src/auth/auth.controller.ts`
 cannot hand back to this app). It reads `FRONTEND_URL`, defaulting to
 `http://localhost:3001`.
 
-## Two backend quirks the UI works around
+## Ownership
 
-- **`GET /url/:shortCode` is behind the guard.** A short link opened in a new
-  tab sends no bearer token and would 401, so "Open" reads the destination from
-  `/details` and pings the redirect route separately just to bump the counter.
-- **`GET /url` is unfiltered.** It returns everyone's links, which is why
-  `/explore` exists and hides the edit and delete controls there.
+Short URLs are private to the account that created them; the backend scopes
+every owner-facing route to the caller and answers 404 for someone else's short
+code. Nothing in this client can surface another user's links.
+
+`GET /url/:shortCode` — the redirect — is deliberately public, so the "follow"
+buttons are plain `<a>` links to the short URL. That is the same path a real
+visitor takes, and it is what increments the visit counter.
 
 ## Layout
 

@@ -168,19 +168,6 @@ export const authApi = {
 /* URLs — backend/src/url/url.controller.ts (every route is guarded)   */
 /* ------------------------------------------------------------------ */
 
-/**
- * Hits the guarded redirect route so the backend increments visit_count.
- * The browser then tries to follow the 302 to a third-party host and the
- * fetch usually rejects on CORS — by then the count is already recorded, so
- * the rejection is swallowed on purpose.
- */
-async function countVisit(shortCode: string): Promise<void> {
-  try {
-    await send(`/url/${encodeURIComponent(shortCode)}`, { auth: true });
-  } catch {
-    /* the redirect target has no CORS headers — expected */
-  }
-}
 
 export const urlApi = {
   /** POST /url → the short URL as a bare string */
@@ -195,8 +182,11 @@ export const urlApi = {
   /** GET /url/user → the signed-in user's links */
   listMine: () => request<ShortUrl[]>('/url/user', { auth: true }),
 
-  /** GET /url → every link in the system */
-  listAll: () => request<ShortUrl[]>('/url', { auth: true }),
+  /**
+   * GET /url → also the signed-in user's links. The backend scopes this to the
+   * caller; no route exposes another account's links.
+   */
+  list: () => request<ShortUrl[]>('/url', { auth: true }),
 
   /** GET /url/:shortCode/details → the full record */
   details: (shortCode: string) =>
@@ -225,25 +215,6 @@ export const urlApi = {
       auth: true,
     }),
 
-  /**
-   * GET /url/:shortCode answers with a 302 to the original URL, but it sits
-   * behind the AuthGuard — a plain <a> in a new tab carries no bearer token and
-   * would 401.
-   *
-   * We also cannot just fetch it and read the final URL: the browser follows
-   * the 302 to the destination host, which almost never returns CORS headers,
-   * so the fetch rejects. Instead read the destination from the guarded
-   * /details route, and fire the redirect route separately purely so the
-   * backend records the visit — the counter is bumped before the 302 is sent,
-   * so the CORS failure on the follow is harmless.
-   */
-  async resolveAndOpen(shortCode: string): Promise<string> {
-    const record = await urlApi.details(shortCode);
-
-    void countVisit(shortCode);
-
-    return record.original_url;
-  },
 };
 
 /** Turns a short_code into the shareable link the backend hands out. */

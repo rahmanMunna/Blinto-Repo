@@ -30,6 +30,34 @@ export class UrlService {
         return `${this.baseUrl}/${shortCode}`;
     }
 
+    /**
+     * Loads a short URL that belongs to the given user.
+     *
+     * Being signed in is not enough to reach someone else's link, so every
+     * owner-facing lookup goes through here. A code that exists but belongs to
+     * another account answers 404 rather than 403, so the response does not
+     * reveal which short codes are taken.
+     */
+    private async findOwnedOrFail(shortCode: string, userId: string): Promise<UrlEntity> {
+        const urlEntity = await this.urlRepo.findOne({
+            where: {
+                short_code: shortCode,
+                user: { id: userId },
+            },
+        });
+
+        if (!urlEntity) {
+            throw new NotFoundException('URL not found');
+        }
+
+        return urlEntity;
+    }
+
+    /**
+     * Public on purpose — this backs the redirect, which anyone holding the
+     * short link may follow. It exposes only the destination of a code the
+     * visitor already has.
+     */
     async getOriginalUrlByShortCode(shortCode: string): Promise<string> {
         const urlEntity = await this.urlRepo.findOne({
             where: { short_code: shortCode },
@@ -43,20 +71,11 @@ export class UrlService {
         return urlEntity?.original_url;
     }
 
-    async getShortUrlDetailsByShortCode(shortCode: string): Promise<UrlEntity> {
-        const urlEntity = await this.urlRepo.findOne({
-            where: { short_code: shortCode },
-        });
-
-        if (!urlEntity) {
-            throw new NotFoundException('URL not found');
-        }
-
-        return urlEntity;
+    async getShortUrlDetailsByShortCode(shortCode: string, userId: string): Promise<UrlEntity> {
+        return await this.findOwnedOrFail(shortCode, userId);
     }
 
     async getAllShortenedUrlByUserId(id: string) {
-        // const userId = user.sub;
         const urls = await this.urlRepo.find({
             where: {
                 user: {
@@ -73,42 +92,22 @@ export class UrlService {
         await this.urlRepo.save(urlEntity);
     }
 
-    async getVisitCountByShortCode(shortCode: string): Promise<number> {
-        const urlEntity = await this.urlRepo.findOne({
-            where: { short_code: shortCode },
-        })
-
-        if (!urlEntity) {
-            throw new NotFoundException('URL not found');
-        }
+    async getVisitCountByShortCode(shortCode: string, userId: string): Promise<number> {
+        const urlEntity = await this.findOwnedOrFail(shortCode, userId);
 
         return urlEntity?.visit_count || 0;
     }
 
-    async getAllShortenedUrls(): Promise<UrlEntity[]> {
-        return await this.urlRepo.find();
-    }
-
-    async deleteShortUrlByShortCode(shortCode: string): Promise<boolean> {
-        const urlEntity = await this.urlRepo.findOne({
-            where: { short_code: shortCode },
-        });
-
-        if (!urlEntity) {
-            throw new NotFoundException('URL not found');
-        }
+    async deleteShortUrlByShortCode(shortCode: string, userId: string): Promise<boolean> {
+        const urlEntity = await this.findOwnedOrFail(shortCode, userId);
 
         await this.urlRepo.remove(urlEntity);
         return true;
     }
 
-    async updateShortUrlByShortCode(shortCode: string, newOriginalUrl: string): Promise<{ short_code: string; new_original_url: string }> {
-        const urlEntity = await this.urlRepo.findOne({
-            where: { short_code: shortCode },
-        });
-        if (!urlEntity) {
-            throw new NotFoundException('URL not found');
-        }
+    async updateShortUrlByShortCode(shortCode: string, newOriginalUrl: string, userId: string): Promise<{ short_code: string; new_original_url: string }> {
+        const urlEntity = await this.findOwnedOrFail(shortCode, userId);
+
         urlEntity.original_url = newOriginalUrl;
         await this.urlRepo.save(urlEntity);
 

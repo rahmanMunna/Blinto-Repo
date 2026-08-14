@@ -103,7 +103,7 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl px-5 py-10">
       <header className="animate-rise">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Hey {user?.username} 👋
+          Hey {user?.username?.trim() || 'there'} 👋
         </h1>
         <p className="mt-1.5 text-sm text-mist-500">
           Shorten a new link or manage the ones you already have.

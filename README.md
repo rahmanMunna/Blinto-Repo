@@ -67,16 +67,28 @@ Scalar reference: <http://localhost:3000/docs/api/v1>
 | GET | `/auth/google` | — | — | 302 to Google |
 | GET | `/auth/google/callback` | — | — | 302 to the frontend with the tokens |
 | POST | `/url` | Bearer | `originalUrl` | the short URL as a plain string |
-| GET | `/url` | Bearer | — | every link on the server |
+| GET | `/url` | Bearer | — | the caller's links |
 | GET | `/url/user` | Bearer | — | the caller's links |
-| GET | `/url/:shortCode` | Bearer | — | 302 to the destination, counts a visit |
-| GET | `/url/:shortCode/visits` | Bearer | — | `{ visits }` |
-| GET | `/url/:shortCode/details` | Bearer | — | the full record |
-| PATCH | `/url/:shortCode` | Bearer | `originalUrl` | `{ short_code, new_original_url }` |
-| DELETE | `/url/:shortCode` | Bearer | — | `true` |
+| GET | `/url/:shortCode` | **public** | — | 302 to the destination, counts a visit |
+| GET | `/url/:shortCode/visits` | Bearer, owner | — | `{ visits }` |
+| GET | `/url/:shortCode/details` | Bearer, owner | — | the full record |
+| PATCH | `/url/:shortCode` | Bearer, owner | `originalUrl` | `{ short_code, new_original_url }` |
+| DELETE | `/url/:shortCode` | Bearer, owner | — | `true` |
 
 Auth is by `Authorization: Bearer <access_token>`. The login and callback routes
 also set httpOnly cookies, but the guard does not read them.
+
+### Ownership
+
+Short URLs are private to the account that created them. Every owner-facing
+route is scoped to `request.user.sub`, and a short code that belongs to another
+account answers **404** rather than 403, so the response does not reveal which
+codes are in use. No route lists another account's links.
+
+The one exception is the redirect, `GET /url/:shortCode`, which is public by
+design — a short link is pasted into an address bar, a chat message or a QR
+code, none of which can send an `Authorization` header. It reveals only the
+destination of a code the visitor already holds.
 
 See [frontend/README.md](frontend/README.md) for the client's structure and the
 two sign-in flows.

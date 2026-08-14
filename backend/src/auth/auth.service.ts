@@ -122,10 +122,21 @@ export class AuthService {
                     ),
                 });
 
+            // Rebuild the payload from the database rather than copying it out
+            // of the refresh token. Tokens minted by the Google flow carry only
+            // `sub`, so copying would hand back an access token with no
+            // username or role; reading the user also keeps the role current
+            // if it changed since the token was issued.
+            const user = await this.userService.findById(payload.sub);
+
+            if (!user) {
+                throw new UnauthorizedException('User no longer exists');
+            }
+
             const newPayload = {
-                sub: payload.sub,
-                username: payload.username,
-                role: payload.role,
+                sub: user.id,
+                username: user.username,
+                role: user.role,
             };
 
             const accessToken =
@@ -185,10 +196,10 @@ export class AuthService {
                 expiresIn: "15m",
             });
 
+        // Same claims as the access token — a refresh token carrying only `sub`
+        // produced access tokens with no username or role.
         const refresh_token = await this.jwtService.signAsync(
-            {
-                sub: user.id,
-            },
+            payload,
             {
                 secret: this.configService.get<string>(
                     "JWT_REFRESH_SECRET",

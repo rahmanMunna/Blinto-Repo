@@ -51,16 +51,17 @@ export class UrlController {
   @ApiBearerAuth()
   @Get()
   @ApiOperation({
-    summary: 'Get all shortened URLs',
-    description: 'Returns a list of all generated shortened URLs.',
+    summary: 'Get your shortened URLs',
+    description:
+      'Returns the shortened URLs belonging to the authenticated user. There is no route that lists other accounts\' links.',
   })
   @ApiResponse({
     status: 200,
     description: 'List of shortened URLs retrieved successfully',
     type: [UrlEntity],
   })
-  async getAllShortenedUrls() {
-    return await this.urlService.getAllShortenedUrls();
+  async getAllShortenedUrls(@CurrentUser() user: any) {
+    return await this.urlService.getAllShortenedUrlByUserId(user.sub);
   }
 
   @UseGuards(AuthGuard)
@@ -79,14 +80,15 @@ export class UrlController {
     return await this.urlService.getAllShortenedUrlByUserId(user.sub)
   }
 
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  // Public on purpose: a short link is pasted into a browser address bar, a
+  // chat message or a QR code, none of which can send an Authorization header.
+  // Guarding this route would make every shared link answer 401.
   @Get(':shortCode')
   @Redirect('', 302)
   @ApiOperation({
     summary: 'Redirect to original URL',
     description:
-      'Redirects the user to the original URL associated with the provided short code.',
+      'Redirects the user to the original URL associated with the provided short code. Public — no authentication required.',
   })
   @ApiParam({
     name: 'shortCode',
@@ -135,9 +137,10 @@ export class UrlController {
   })
   async getVisitCount(
     @Param('shortCode') shortCode: string,
+    @CurrentUser() user: any,
   ): Promise<{ visits: number }> {
     const visits =
-      await this.urlService.getVisitCountByShortCode(shortCode);
+      await this.urlService.getVisitCountByShortCode(shortCode, user.sub);
 
     return { visits };
   }
@@ -163,8 +166,12 @@ export class UrlController {
   })
   async getShortUrlDetailsByShortCode(
     @Param('shortCode') shortCode: string,
+    @CurrentUser() user: any,
   ): Promise<UrlEntity> {
-    return await this.urlService.getShortUrlDetailsByShortCode(shortCode);
+    return await this.urlService.getShortUrlDetailsByShortCode(
+      shortCode,
+      user.sub,
+    );
   }
 
 
@@ -197,10 +204,12 @@ export class UrlController {
   async updateShortUrlByShortCode(
     @Param('shortCode') shortCode: string,
     @Body() createUrlDto: CreateUrlDto,
+    @CurrentUser() user: any,
   ): Promise<{ short_code: string; new_original_url: string }> {
     return await this.urlService.updateShortUrlByShortCode(
       shortCode,
       createUrlDto.originalUrl,
+      user.sub,
     );
   }
 
@@ -227,7 +236,8 @@ export class UrlController {
   })
   async deleteShortUrlByShortCode(
     @Param('shortCode') shortCode: string,
+    @CurrentUser() user: any,
   ): Promise<boolean> {
-    return await this.urlService.deleteShortUrlByShortCode(shortCode);
+    return await this.urlService.deleteShortUrlByShortCode(shortCode, user.sub);
   }
 }

@@ -9,8 +9,9 @@ import { ApiError, urlApi } from '@/lib/api';
 import type { ShortUrl } from '@/lib/types';
 
 /**
- * GET /url returns every link in the system, not just the caller's — the
- * backend applies no ownership filter on that route.
+ * Your own links, ranked by traffic and searchable — the counterpart to the
+ * dashboard, which is ordered by recency. GET /url is scoped to the caller on
+ * the backend, so nobody else's links can appear here.
  */
 function Explore() {
   const [links, setLinks] = useState<ShortUrl[]>([]);
@@ -22,7 +23,7 @@ function Explore() {
     setError(null);
 
     try {
-      setLinks(await urlApi.listAll());
+      setLinks(await urlApi.list());
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : 'Could not load the links.',
@@ -54,10 +55,10 @@ function Explore() {
     <div className="mx-auto max-w-6xl px-5 py-10">
       <header className="animate-rise">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          All links
+          Top links
         </h1>
         <p className="mt-1.5 text-sm text-mist-500">
-          Every short link on this server, busiest first.
+          Your links, busiest first. Search by short code or destination.
         </p>
       </header>
 
@@ -85,17 +86,12 @@ function Explore() {
             description={
               query
                 ? 'Try a different short code or destination.'
-                : 'Once anyone shortens a URL it will be listed here.'
+                : 'Shorten a URL from the dashboard and it will be listed here.'
             }
           />
         ) : (
           visible.map((link) => (
-            <LinkCard
-              key={link.id}
-              url={link}
-              manageable={false}
-              onChanged={() => void load()}
-            />
+            <LinkCard key={link.id} url={link} onChanged={() => void load()} />
           ))
         )}
       </div>

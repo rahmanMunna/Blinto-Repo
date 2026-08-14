@@ -26,19 +26,13 @@ function formatDate(value: string): string {
 
 interface LinkCardProps {
   url: ShortUrl;
-  /** Owner-only affordances are hidden on the shared "All links" view. */
-  manageable?: boolean;
   onChanged?: () => void;
 }
 
-export function LinkCard({
-  url,
-  manageable = true,
-  onChanged,
-}: LinkCardProps) {
+export function LinkCard({ url, onChanged }: LinkCardProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(url.original_url);
-  const [busy, setBusy] = useState<null | 'save' | 'delete' | 'open'>(null);
+  const [busy, setBusy] = useState<null | 'save' | 'delete'>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -76,20 +70,12 @@ export function LinkCard({
     }
   }
 
-  /** GET /url/:shortCode is guarded, so resolve through the API then navigate. */
-  async function open() {
-    setError(null);
-    setBusy('open');
-
-    try {
-      const destination = await urlApi.resolveAndOpen(url.short_code);
-      window.open(destination, '_blank', 'noopener,noreferrer');
-      onChanged?.();
-    } catch (err) {
-      report(err);
-    } finally {
-      setBusy(null);
-    }
+  /**
+   * The short link is public, so it can be followed directly. Give the backend
+   * a moment to record the visit, then refresh so the counter looks right.
+   */
+  function noteVisit() {
+    setTimeout(() => onChanged?.(), 900);
   }
 
   return (
@@ -160,55 +146,46 @@ export function LinkCard({
           <div className="flex flex-wrap items-center gap-2">
             <CopyButton value={share} className="!px-2.5 !py-2" label="Copy" />
 
+            <a
+              href={share}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={noteVisit}
+              className="btn btn-ghost !px-2.5 !py-2"
+              title="Follow the short link"
+              aria-label="Follow the short link"
+            >
+              <ExternalIcon className="h-4 w-4" />
+            </a>
+
             <button
               type="button"
-              onClick={open}
-              disabled={busy === 'open'}
+              onClick={() => setEditing(true)}
               className="btn btn-ghost !px-2.5 !py-2"
-              title="Open destination"
-              aria-label="Open destination"
+              title="Edit destination"
+              aria-label="Edit destination"
             >
-              {busy === 'open' ? (
-                <Spinner />
-              ) : (
-                <ExternalIcon className="h-4 w-4" />
-              )}
+              <EditIcon className="h-4 w-4" />
             </button>
 
-            {manageable && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  className="btn btn-ghost !px-2.5 !py-2"
-                  title="Edit destination"
-                  aria-label="Edit destination"
-                >
-                  <EditIcon className="h-4 w-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    confirmDelete ? remove() : setConfirmDelete(true)
-                  }
-                  onBlur={() => setConfirmDelete(false)}
-                  disabled={busy === 'delete'}
-                  className="btn btn-danger !px-2.5 !py-2"
-                  title={confirmDelete ? 'Click again to confirm' : 'Delete link'}
-                  aria-label={
-                    confirmDelete ? 'Confirm delete' : 'Delete link'
-                  }
-                >
-                  {busy === 'delete' ? (
-                    <Spinner />
-                  ) : (
-                    <TrashIcon className="h-4 w-4" />
-                  )}
-                  {confirmDelete && <span className="text-xs">Sure?</span>}
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={() =>
+                confirmDelete ? remove() : setConfirmDelete(true)
+              }
+              onBlur={() => setConfirmDelete(false)}
+              disabled={busy === 'delete'}
+              className="btn btn-danger !px-2.5 !py-2"
+              title={confirmDelete ? 'Click again to confirm' : 'Delete link'}
+              aria-label={confirmDelete ? 'Confirm delete' : 'Delete link'}
+            >
+              {busy === 'delete' ? (
+                <Spinner />
+              ) : (
+                <TrashIcon className="h-4 w-4" />
+              )}
+              {confirmDelete && <span className="text-xs">Sure?</span>}
+            </button>
           </div>
         )}
       </div>
