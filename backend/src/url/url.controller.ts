@@ -15,6 +15,7 @@ import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UrlEntity } from './entity/url.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from 'decorators/currentUser.decorator';
 
 @ApiTags('URL Shortener')
 @Controller('url')
@@ -40,9 +41,9 @@ export class UrlController {
     },
   })
   async createShortUrl(
-    @Body() createUrlDto: CreateUrlDto,
+    @Body() createUrlDto: CreateUrlDto, @CurrentUser() user: any,
   ): Promise<string> {
-    return await this.urlService.createShortUrl(createUrlDto.originalUrl);
+    return await this.urlService.createShortUrl(createUrlDto.originalUrl, user);
   }
 
 
@@ -62,6 +63,21 @@ export class UrlController {
     return await this.urlService.getAllShortenedUrls();
   }
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @Get("/user")
+  @ApiOperation({
+    summary: 'Get all shortened URLs for a specific user',
+    description: 'Returns a list of all generated shortened URLs.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of shortened URLs retrieved successfully',
+    type: [UrlEntity],
+  })
+  async getAllShortenedUrlsByUserId(@CurrentUser() user: any) {
+    return await this.urlService.getAllShortenedUrlByUserId(user.sub)
+  }
 
   @UseGuards(AuthGuard)
   @ApiBearerAuth()

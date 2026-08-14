@@ -1,14 +1,22 @@
 import {
     Body,
     Controller,
+    Get,
     Post,
+    Req,
+    Res,
+    UnauthorizedException,
+    UseGuards,
 } from '@nestjs/common';
+import type { Response } from "express";
+
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
 import { RegisterGuestDto } from './dto/register-guest.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { GoogleAuthGuard } from './gaurds/google-auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -35,12 +43,36 @@ export class AuthController {
 
     // login
     @Post('login')
-    async login(@Body() user: LoginDto) {
-        // return user
-        return await this.authService.signIn(user.username, user.password);
+    async login(@Body() user: LoginDto, @Res({ passthrough: true }) res: Response) {
+        const { access_token, refresh_token } = await this.authService.signIn(user.username, user.password);
+
+        res.cookie("access_token", access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 15 * 60 * 1000,
+            path: "/",
+        });
+
+        res.cookie("refresh_token", refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: "/",
+        });
+
+        return { access_token, refresh_token }
     }
 
-    @Post('refresh')
+    // @Post('refresh')
+
+    // async refreshAccessToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    //     return this.authService.refreshAccessToken(
+    //         refreshTokenDto.refreshToken,
+    //     );
+    // }
+
     @ApiOperation({
         summary: 'Refresh access token',
         description:
@@ -54,9 +86,78 @@ export class AuthController {
         status: 401,
         description: 'Invalid or expired refresh token.',
     })
-    async refreshAccessToken(@Body() refreshTokenDto: RefreshTokenDto) {
-        return this.authService.refreshAccessToken(
-            refreshTokenDto.refreshToken,
-        );
+    @Post("refresh")
+    async refresh(
+        @Body() refreshTokenDto: RefreshTokenDto,
+        // @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        // const refreshToken = req.cookies.refresh_token;
+
+        if (!refreshTokenDto.refreshToken) {
+            throw new UnauthorizedException("Refresh token missing");
+        }
+
+        const { access_token, refresh_token } = await this.authService.refreshAccessToken(refreshTokenDto.refreshToken);
+
+        res.cookie("access_token", access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 15 * 60 * 1000,
+            path: "/",
+        });
+
+        return { access_token, refresh_token }
     }
+
+
+
+    // OAUTH
+
+    @Get('google')
+    @UseGuards(GoogleAuthGuard)
+    async googleLogin() {
+        // Passport redirects the user to Google
+    }
+
+    @Get('google/callback')
+    @UseGuards(GoogleAuthGuard)
+    async googleCallback(@Req() req: any, @Res() res: Response) {
+        const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3001';
+
+        try {
+            const { access_token, refresh_token } = await this.authService.googleLogin(req.user);
+            // Store cookies
+            res.cookie("access_token", access_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 15 * 60 * 1000,
+                path: "/",
+            });
+
+            res.cookie("refresh_token", refresh_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: "/",
+            });
+
+            // The AuthGuard reads the Authorization header, not these cookies, so
+            // hand the tokens to the frontend as well. A browser lands here by
+            // full page navigation and cannot read a JSON response, so redirect.
+            const params = new URLSearchParams({ access_token, refresh_token });
+
+            return res.redirect(`${frontendUrl}/auth/google/callback?${params.toString()}`);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Google sign-in failed';
+            const params = new URLSearchParams({ error: message });
+
+            return res.redirect(`${frontendUrl}/auth/google/callback?${params.toString()}`);
+        }
+    }
+
+
 }

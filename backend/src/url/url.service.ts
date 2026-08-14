@@ -15,13 +15,16 @@ export class UrlService {
         return nanoid(10);
     }
 
-    async createShortUrl(originalUrl: string): Promise<string> {
+    async createShortUrl(originalUrl: string, user: any): Promise<string> {
         const shortCode = this.generateShortCode();
 
         // save to db
         await this.urlRepo.save({
             short_code: shortCode,
             original_url: originalUrl,
+            user: {
+                id : user.sub
+            }
         });
 
         return `${this.baseUrl}/${shortCode}`;
@@ -50,6 +53,18 @@ export class UrlService {
         }
 
         return urlEntity;
+    }
+
+    async getAllShortenedUrlByUserId(id: string) {
+        // const userId = user.sub;
+        const urls = await this.urlRepo.find({
+            where: {
+                user: {
+                    id: id
+                }
+            }
+        })
+        return urls;
     }
 
 
