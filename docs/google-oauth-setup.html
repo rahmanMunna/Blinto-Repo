@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Google Sign-In Setup Guide — Blinto</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm 16mm 20mm 16mm;
+      }
+
+      :root {
+        --ink: #16181d;
+        --muted: #5b6472;
+        --line: #d9dee6;
+        --accent: #3b4ee0;
+        --accent-soft: #eef0fe;
+        --code-bg: #f6f7f9;
+        --warn-bg: #fff8e6;
+        --warn-line: #e6c34a;
+        --good-bg: #edfaf1;
+        --good-line: #64bd82;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+        font-size: 10.4pt;
+        line-height: 1.62;
+        color: var(--ink);
+        background: #fff;
+      }
+
+      code,
+      pre {
+        font-family: 'Cascadia Mono', 'SF Mono', Consolas, monospace;
+      }
+
+      code {
+        font-size: 0.88em;
+        background: var(--code-bg);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        padding: 0.05em 0.32em;
+        white-space: nowrap;
+      }
+
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--accent);
+        border-radius: 4px;
+        padding: 10px 12px;
+        font-size: 8.9pt;
+        line-height: 1.5;
+        overflow-x: auto;
+        break-inside: avoid;
+        margin: 10px 0;
+      }
+
+      pre code {
+        background: none;
+        border: 0;
+        padding: 0;
+        font-size: inherit;
+        white-space: pre;
+      }
+
+      h1 {
+        font-size: 25pt;
+        line-height: 1.15;
+        margin: 0 0 6px;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        font-size: 15pt;
+        margin: 30px 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid var(--accent);
+        letter-spacing: -0.01em;
+        break-after: avoid;
+      }
+
+      h3 {
+        font-size: 11.6pt;
+        margin: 20px 0 6px;
+        color: #23262d;
+        break-after: avoid;
+      }
+
+      h4 {
+        font-size: 10.4pt;
+        margin: 14px 0 4px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        break-after: avoid;
+      }
+
+      p {
+        margin: 8px 0;
+      }
+
+      ul,
+      ol {
+        margin: 8px 0;
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 4px 0;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        word-break: break-all;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0;
+        font-size: 9.4pt;
+        break-inside: avoid;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 6px 9px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--accent-soft);
+        font-weight: 600;
+      }
+
+      td code {
+        white-space: normal;
+        word-break: break-all;
+      }
+
+      .cover {
+        border-bottom: 3px solid var(--accent);
+        padding-bottom: 18px;
+        margin-bottom: 6px;
+      }
+
+      .sub {
+        font-size: 12pt;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .meta {
+        margin-top: 14px;
+        font-size: 9pt;
+        color: var(--muted);
+      }
+
+      .note,
+      .warn,
+      .good {
+        border-radius: 4px;
+        padding: 9px 12px;
+        margin: 12px 0;
+        break-inside: avoid;
+        font-size: 9.8pt;
+      }
+
+      .note {
+        background: var(--accent-soft);
+        border-left: 3px solid var(--accent);
+      }
+
+      .warn {
+        background: var(--warn-bg);
+        border-left: 3px solid var(--warn-line);
+      }
+
+      .good {
+        background: var(--good-bg);
+        border-left: 3px solid var(--good-line);
+      }
+
+      .label {
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .toc {
+        background: #fafbfc;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 14px 18px;
+        margin: 22px 0;
+        break-inside: avoid;
+      }
+
+      .toc h4 {
+        margin-top: 0;
+      }
+
+      .toc ol {
+        margin: 0;
+        columns: 2;
+        column-gap: 26px;
+        font-size: 9.6pt;
+      }
+
+      .path {
+        font-family: 'Cascadia Mono', Consolas, monospace;
+        font-size: 0.9em;
+        background: var(--accent-soft);
+        border-radius: 3px;
+        padding: 0.08em 0.4em;
+        white-space: nowrap;
+      }
+
+      .steps {
+        counter-reset: step;
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .steps > li {
+        counter-increment: step;
+        position: relative;
+        padding-left: 30px;
+        margin: 12px 0;
+        break-inside: avoid;
+      }
+
+      .steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 1px;
+        width: 20px;
+        height: 20px;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 50%;
+        font-size: 8.6pt;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .flow {
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 14px 16px;
+        margin: 14px 0;
+        background: #fafbfc;
+        font-size: 9.3pt;
+        break-inside: avoid;
+      }
+
+      .flow div {
+        padding: 3px 0;
+      }
+
+      .flow .who {
+        display: inline-block;
+        min-width: 78px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .page-break {
+        break-before: page;
+      }
+
+      .file-head {
+        font-family: 'Cascadia Mono', Consolas, monospace;
+        font-size: 8.6pt;
+        color: #fff;
+        background: #3a4150;
+        padding: 4px 10px;
+        border-radius: 4px 4px 0 0;
+        display: inline-block;
+        margin-bottom: -10px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .file-head + pre {
+        border-top-left-radius: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <h1>Sign in with Google</h1>
+      <p class="sub">
+        Complete setup and implementation guide — Google Cloud Console through
+        working code
+      </p>
+      <p class="meta">
+        Project: <strong>Blinto</strong> URL shortener · NestJS backend
+        (<code>:3000</code>) + Next.js frontend (<code>:3001</code>) ·
+        Passport <code>google-oauth20</code> with self-issued JWTs
+      </p>
+    </header>
+
+    <div class="note">
+      <span class="label">Who this is for.</span> You, in six months, having
+      forgotten all of it. Every value you must click, copy, or type is written
+      out literally. Follow it top to bottom and Google sign-in will work; the
+      final section is a checklist to prove it does.
+    </div>
+
+    <div class="toc">
+      <h4>Contents</h4>
+      <ol>
+        <li>How the flow works</li>
+        <li>Google Cloud Console setup</li>
+        <li>Environment variables</li>
+        <li>Packages to install</li>
+        <li>Backend implementation</li>
+        <li>Frontend implementation</li>
+        <li>Errors and what causes them</li>
+        <li>Verification checklist</li>
+        <li>Going to production</li>
+      </ol>
+    </div>
+
+    <h2>1. How the flow works</h2>
+
+    <p>
+      Google never gives your server a password. It gives you a
+      <em>one-time code</em> proving someone authenticated, which your server
+      trades — server to server, using your client secret — for that person's
+      profile. You then issue <strong>your own</strong> tokens and throw
+      Google's away. Google's role ends at "yes, this is really them."
+    </p>
+
+    <div class="flow">
+      <div><span class="who">Browser</span>→ clicks the button; the page navigates to <code>:3000/auth/google</code></div>
+      <div><span class="who">Backend</span>→ 302 to <code>accounts.google.com</code> with client_id + redirect_uri + scope</div>
+      <div><span class="who">Google</span>→ user logs in and consents (on Google's own domain)</div>
+      <div><span class="who">Google</span>→ 302 back to <code>:3000/auth/google/callback?code=…</code></div>
+      <div><span class="who">Backend</span>→ trades the code for Google's tokens, fetches the profile</div>
+      <div><span class="who">Backend</span>→ finds or creates the matching user row in Postgres</div>
+      <div><span class="who">Backend</span>→ signs <em>its own</em> access + refresh JWTs</div>
+      <div><span class="who">Backend</span>→ 302 to <code>:3001/auth/google/callback?access_token=…&amp;refresh_token=…</code></div>
+      <div><span class="who">Frontend</span>→ stores the tokens, cleans the URL, lands on the dashboard</div>
+    </div>
+
+    <div class="warn">
+      <span class="label">The single most important structural point.</span>
+      Steps 1 through 8 are <strong>full page navigations</strong>, not
+      <code>fetch</code> calls. The user must physically see Google's consent
+      screen, so the browser genuinely leaves your site. This is why the backend
+      callback must end in a <strong>redirect</strong> and not a JSON response —
+      no JavaScript of yours is running on that page to receive JSON. Getting
+      this wrong is the most common way this integration fails.
+    </div>
+
+    <h2 class="page-break">2. Google Cloud Console setup</h2>
+
+    <p>
+      Start at <a href="https://console.cloud.google.com/">console.cloud.google.com</a>.
+      Everything below is free and takes about ten minutes.
+    </p>
+
+    <h3>2.1 Create a project</h3>
+    <ol class="steps">
+      <li>Click the project dropdown in the top bar, then <strong>New Project</strong>.</li>
+      <li>Name it something you will recognise later — e.g. <strong>Blinto</strong>. No organisation needed.</li>
+      <li>Create it, then <strong>make sure it is selected</strong> in the top bar. Everything after this applies to the selected project, and configuring the wrong project is a genuinely easy mistake to make.</li>
+    </ol>
+
+    <h3>2.2 Configure the consent screen</h3>
+    <p>
+      Navigate to <span class="path">APIs &amp; Services → OAuth consent screen</span>.
+      In the current console this is branded <strong>Google Auth Platform</strong>,
+      with the settings split across <em>Branding</em>, <em>Audience</em>,
+      <em>Clients</em>, and <em>Data Access</em>. Older guides call the same
+      thing "OAuth consent screen" as one page — if the layout does not match,
+      the field names still do.
+    </p>
+
+    <ol class="steps">
+      <li>
+        <strong>User type / Audience: External.</strong> "Internal" only exists
+        if you have a Google Workspace organisation, and restricts sign-in to
+        that org.
+      </li>
+      <li>
+        <strong>App name</strong> — what the user sees on the consent screen
+        ("Blinto wants to access your account"). <strong>User support email</strong>
+        — pick your own address from the dropdown.
+      </li>
+      <li>
+        <strong>Developer contact email</strong> at the bottom. Required; Google
+        emails you here about the project.
+      </li>
+      <li>
+        <strong>Scopes:</strong> add <code>.../auth/userinfo.email</code> and
+        <code>.../auth/userinfo.profile</code>. These are the
+        <code>email</code> and <code>profile</code> shorthands in the strategy
+        code. Both are <em>non-sensitive</em>, so you will never need Google's
+        verification review.
+      </li>
+      <li>
+        <strong>Test users:</strong> while the app is in <em>Testing</em>, only
+        listed addresses can sign in — everyone else gets
+        <code>access_denied</code>. Add your own Google account, and any
+        teammate's, here. This traps a lot of people.
+      </li>
+    </ol>
+
+    <h3>2.3 Create the OAuth client ID</h3>
+    <p>Go to <span class="path">APIs &amp; Services → Credentials</span> (or the <em>Clients</em> tab).</p>
+
+    <ol class="steps">
+      <li><strong>Create Credentials → OAuth client ID</strong>.</li>
+      <li>
+        <strong>Application type: Web application.</strong> Not "Desktop", not
+        "Single-Page App" — your server holds the secret and performs the code
+        exchange, which is the Web application flow.
+      </li>
+      <li>
+        <strong>Authorized redirect URIs → Add URI:</strong>
+        <pre><code>http://localhost:3000/auth/google/callback</code></pre>
+        This must match <code>GOOGLE_CALLBACK_URL</code> in your
+        <code>.env</code> <strong>character for character</strong> — scheme,
+        host, port, path, and no trailing slash. Google compares it as an exact
+        string. Add one entry per environment (local, staging, production).
+      </li>
+      <li>
+        <strong>Authorized JavaScript origins</strong> can be left empty. That
+        field is for browser-side flows; yours is server-side. Adding
+        <code>http://localhost:3001</code> is harmless if you prefer.
+      </li>
+      <li>
+        Create it. A dialog shows the <strong>Client ID</strong> and
+        <strong>Client secret</strong> — copy both now. The secret can be
+        re-revealed later from the client's detail page, but copying now saves a
+        trip.
+      </li>
+    </ol>
+
+    <div class="note">
+      <span class="label">No APIs need enabling.</span> You may remember having
+      to switch on the "Google+ API" or "People API". That is obsolete —
+      <code>passport-google-oauth20</code> reads the OpenID
+      <code>userinfo</code> endpoint, which needs no API enabled. If sign-in
+      fails, the cause is in section 7, not a missing API.
+    </div>
+
+    <div class="warn">
+      <span class="label">http://localhost is a special case.</span> Google
+      normally rejects plain <code>http</code> redirect URIs, but permits them
+      for <code>localhost</code> so you can develop without TLS. Every deployed
+      environment must use <code>https</code>.
+    </div>
+
+    <h2 class="page-break">3. Environment variables</h2>
+
+    <h4>backend/.env</h4>
+    <pre><code># --- Postgres ---
+PG_HOST=localhost
+PG_PORT=5432
+PG_USER_NAME=postgres
+PG_PASSWORD=your_password
+PG_DB_NAME=Blinto
+
+# --- JWT (yours, unrelated to Google) ---
+# Generate each with:  openssl rand -base64 32
+JWT_ACCESS_SECRET=...
+JWT_REFRESH_SECRET=...
+
+# --- Google OAuth (from section 2.3) ---
+GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxxxxxxxx
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# Where the backend sends the browser once tokens are minted
+FRONTEND_URL=http://localhost:3001</code></pre>
+
+    <h4>frontend/.env.local</h4>
+    <pre><code>NEXT_PUBLIC_API_URL=http://localhost:3000</code></pre>
+
+    <table>
+      <tr><th>Variable</th><th>Must equal</th></tr>
+      <tr><td><code>GOOGLE_CALLBACK_URL</code></td><td>An Authorized redirect URI in the console, exactly</td></tr>
+      <tr><td><code>FRONTEND_URL</code></td><td>Where Next.js runs — <code>http://localhost:3001</code></td></tr>
+      <tr><td><code>NEXT_PUBLIC_API_URL</code></td><td>Where NestJS runs — <code>http://localhost:3000</code></td></tr>
+    </table>
+
+    <div class="warn">
+      <span class="label">Never commit this file.</span> A client secret pushed
+      to GitHub is compromised and must be rotated from the Console. Confirm
+      <code>.env</code> is in <code>.gitignore</code> before your first commit,
+      and keep a <code>.env.example</code> with the keys but no values.
+    </div>
+
+    <div class="note">
+      <span class="label">The port is not arbitrary.</span> The backend enables
+      CORS for <code>http://localhost:3001</code> only, so the frontend must run
+      there — <code>next dev -p 3001</code>, which is already pinned in
+      <code>frontend/package.json</code>.
+    </div>
+
+    <h2>4. Packages to install</h2>
+    <h4>Backend</h4>
+    <pre><code>npm install @nestjs/passport passport passport-google-oauth20 \
+            @nestjs/jwt @nestjs/config
+npm install -D @types/passport-google-oauth20</code></pre>
+    <p>The frontend needs nothing extra — it only performs a redirect and reads a query string.</p>
+
+    <h2 class="page-break">5. Backend implementation</h2>
+
+    <h3>5.1 The strategy — talks to Google</h3>
+    <p>
+      Passport handles the whole handshake. Your only job is configuration plus a
+      <code>validate()</code> that reshapes Google's profile into something your
+      app likes. Whatever <code>validate()</code> returns becomes
+      <code>req.user</code>.
+    </p>
+
+    <div class="file-head">backend/src/auth/strategies/google.strategy.ts</div>
+<pre><code>@Injectable()
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+  constructor(private readonly configService: ConfigService) {
+    super({
+      clientID:     configService.get&lt;string&gt;('GOOGLE_CLIENT_ID')!,
+      clientSecret: configService.get&lt;string&gt;('GOOGLE_CLIENT_SECRET')!,
+      callbackURL:  configService.get&lt;string&gt;('GOOGLE_CALLBACK_URL')!,
+      scope: ['email', 'profile'],
+    });
+  }
+
+  async validate(accessToken: string, refreshToken: string, profile: any) {
+    const { id, name, emails, photos } = profile;
+
+    return {
+      googleId:  id,
+      email:     emails?.[0]?.value,
+      firstName: name?.givenName,
+      lastName:  name?.familyName,
+      avatar:    photos?.[0]?.value,
+    };
+  }
+}</code></pre>
+
+    <p>
+      The <code>'google'</code> string in <code>PassportStrategy(Strategy, 'google')</code>
+      names this strategy so the guard can select it.
+    </p>
+
+    <h3>5.2 The guard — one class, two jobs</h3>
+    <div class="file-head">backend/src/auth/gaurds/google-auth.guard.ts</div>
+<pre><code>@Injectable()
+export class GoogleAuthGuard extends AuthGuard('google') {}</code></pre>
+
+    <p>
+      Four lines, and it is worth understanding why the <em>same</em> guard is on
+      both routes. Passport looks at whether the request carries a
+      <code>?code=</code>:
+    </p>
+    <ul>
+      <li><strong>No code</strong> (the <code>/auth/google</code> hit) → build the Google URL and redirect.</li>
+      <li><strong>Code present</strong> (the callback) → exchange it, fetch the profile, call <code>validate()</code>, attach <code>req.user</code>, and only then run your handler.</li>
+    </ul>
+
+    <h3>5.3 Module wiring</h3>
+    <div class="file-head">backend/src/auth/auth.module.ts</div>
+<pre><code>@Module({
+  imports: [UserModule, PassportModule, ConfigModule, JwtModule.registerAsync({ ... })],
+  providers: [AuthService, AuthGuard, JwtService, GoogleStrategy],
+  controllers: [AuthController],
+})
+export class AuthModule {}</code></pre>
+    <div class="warn">
+      <span class="label">Forgetting <code>GoogleStrategy</code> in
+      <code>providers</code></span> is a classic. Nest never instantiates it,
+      Passport never registers a strategy named <code>'google'</code>, and every
+      request dies with <code>Unknown authentication strategy "google"</code>.
+    </div>
+
+    <h3>5.4 The two routes</h3>
+    <div class="file-head">backend/src/auth/auth.controller.ts</div>
+<pre><code>@Get('google')
+@UseGuards(GoogleAuthGuard)
+async googleLogin() {
+  // Intentionally empty — the guard redirects to Google before this runs.
+}
+
+@Get('google/callback')
+@UseGuards(GoogleAuthGuard)
+async googleCallback(@Req() req: any, @Res() res: Response) {
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3001';
+
+  try {
+    const { access_token, refresh_token } =
+      await this.authService.googleLogin(req.user);
+
+    res.cookie('access_token',  access_token,  { httpOnly: true, sameSite: 'lax', maxAge: 15 * 60 * 1000,          path: '/' });
+    res.cookie('refresh_token', refresh_token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000, path: '/' });
+
+    // The browser arrived by navigation and cannot read a JSON body,
+    // so hand the tokens over in the query string.
+    const params = new URLSearchParams({ access_token, refresh_token });
+    return res.redirect(`${frontendUrl}/auth/google/callback?${params}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Google sign-in failed';
+    return res.redirect(
+      `${frontendUrl}/auth/google/callback?${new URLSearchParams({ error: message })}`,
+    );
+  }
+}</code></pre>
+
+    <div class="note">
+      <span class="label">Use <code>@Res()</code>, not <code>@Res({ passthrough: true })</code>.</span>
+      With passthrough, Nest still tries to send its own response after you have
+      already redirected, and you get a headers-already-sent error.
+    </div>
+
+    <h3>5.5 Resolving the Google identity to a real user</h3>
+    <p>Three lookups in strict order — the order is the logic:</p>
+
+    <div class="file-head">backend/src/auth/auth.service.ts</div>
+<pre><code>async googleLogin(googleUser: any) {
+  // 1. A returning Google user.
+  let user = await this.userService.findUserByGoogleId(googleUser.googleId);
+
+  // 2. Someone who registered with a password using the same address —
+  //    attach to that account instead of creating a duplicate.
+  if (!user) user = await this.userService.findUserByEmail(googleUser.email);
+
+  // 3. Brand new person.
+  if (!user) user = await this.userService.createUserByGoogleSignIn(googleUser);
+
+  const payload = { sub: user.id, username: user.username, role: user.role };
+
+  const access_token  = await this.jwtService.signAsync(payload, { secret: ...ACCESS,  expiresIn: '15m' });
+  const refresh_token = await this.jwtService.signAsync(payload, { secret: ...REFRESH, expiresIn: '7d'  });
+
+  return { access_token, refresh_token };
+}</code></pre>
+
+    <p>New Google users are created with:</p>
+    <ul>
+      <li><code>googleId</code> set — how step 1 finds them next time.</li>
+      <li><code>password: null</code> — there is no password to store. The login route checks for this and answers <em>"This account does not have a password. Please sign in with Google."</em> instead of comparing against null.</li>
+      <li><code>username</code> set to their <strong>email</strong>. The column is unique and non-null, and Google supplies no username.</li>
+      <li><code>role: 'guest'</code>, same as any other new account.</li>
+    </ul>
+
+    <div class="warn">
+      <span class="label">Sign both tokens with the same claims.</span> The
+      original code signed the refresh token with only <code>{ sub }</code>.
+      Fifteen minutes later the refresh produced an access token with no
+      <code>username</code>, and the UI crashed reading it. Two defences, both
+      applied: sign the full payload, <em>and</em> have
+      <code>refreshAccessToken</code> reload the user from the database rather
+      than copying claims out of the old token. Rebuilding from the database is
+      the stronger fix — it also keeps <code>role</code> current if it changed.
+    </div>
+
+    <h2 class="page-break">6. Frontend implementation</h2>
+
+    <h3>6.1 Starting the flow</h3>
+    <p>
+      An assignment to <code>window.location.href</code> — deliberately not
+      <code>fetch</code>, which would only follow the redirect in the background
+      and hand you an unreadable cross-origin response.
+    </p>
+    <div class="file-head">frontend/src/components/google-button.tsx</div>
+<pre><code>function start() {
+  window.location.href = `${API_URL}/auth/google`;
+}</code></pre>
+
+    <h3>6.2 Receiving the session</h3>
+    <p>
+      A page at <span class="path">/auth/google/callback</span> whose only job is
+      to read the query string, store the tokens, and get out of the way.
+    </p>
+    <div class="file-head">frontend/src/app/auth/google/callback/page.tsx</div>
+<pre><code>useEffect(() => {
+  if (handled.current) return;   // React 18 StrictMode runs effects twice in dev
+  handled.current = true;
+
+  const failure = params.get('error');
+  if (failure) { setError(decodeURIComponent(failure)); return; }
+
+  const access  = params.get('access_token');
+  const refresh = params.get('refresh_token');
+  if (!access || !refresh) { setError('Google did not return a session.'); return; }
+
+  adoptTokens(access, refresh);   // localStorage + decode for username/role
+
+  // replace(), not push() — keeps the token-bearing URL out of history.
+  router.replace('/dashboard');
+}, [params, adoptTokens, router]);</code></pre>
+
+    <p>Three details that matter more than they look:</p>
+    <ul>
+      <li><strong>The <code>handled</code> ref.</strong> React StrictMode fires effects twice in development; without it the adoption runs twice.</li>
+      <li><strong><code>router.replace</code>.</strong> With <code>push</code>, the URL containing both tokens stays in the back-button history and in the browser's session store.</li>
+      <li><strong>Handle <code>?error=</code>.</strong> The backend redirects failures back here too, so the user sees a message rather than a blank screen.</li>
+    </ul>
+
+    <h3>6.3 Why the tokens travel in the URL at all</h3>
+    <p>
+      The backend also sets both tokens as <code>httpOnly</code> cookies — but
+      <code>auth.guard.ts</code> only ever reads
+      <code>Authorization: Bearer</code>. Those cookies are written and never
+      read. Since JavaScript cannot read an <code>httpOnly</code> cookie by
+      design, the query string is the only channel left.
+    </p>
+    <div class="note">
+      <span class="label">The better long-term design</span> is to make the guard
+      read <code>request.cookies.access_token</code>, drop the query string
+      entirely, and add CSRF protection (cookies are sent automatically, so a
+      cookie-authenticated API needs it). That removes the XSS exposure of
+      keeping tokens in <code>localStorage</code>. It is a deliberate piece of
+      work, not a quick edit — worth doing before production.
+    </div>
+
+    <h2 class="page-break">7. Errors and what causes them</h2>
+
+    <table>
+      <tr><th>Symptom</th><th>Cause and fix</th></tr>
+      <tr>
+        <td><code>redirect_uri_mismatch</code></td>
+        <td>The most frequent one. <code>GOOGLE_CALLBACK_URL</code> differs from the console's Authorized redirect URI. Compare character by character — <code>http</code> vs <code>https</code>, a trailing slash, <code>127.0.0.1</code> vs <code>localhost</code>, wrong port. Console edits can take a minute to propagate.</td>
+      </tr>
+      <tr>
+        <td><code>access_denied</code> for some users</td>
+        <td>App is in <em>Testing</em> and the address is not in Test users. Add it, or publish the app (section 9).</td>
+      </tr>
+      <tr>
+        <td><code>Unknown authentication strategy "google"</code></td>
+        <td><code>GoogleStrategy</code> is missing from <code>providers</code> in <code>AuthModule</code>, or <code>PassportModule</code> is not imported.</td>
+      </tr>
+      <tr>
+        <td>Browser shows raw JSON of the tokens</td>
+        <td>The callback returns an object instead of redirecting. Use <code>@Res()</code> and <code>res.redirect(...)</code>.</td>
+      </tr>
+      <tr>
+        <td><code>ERR_HTTP_HEADERS_SENT</code></td>
+        <td><code>@Res({ passthrough: true })</code> combined with <code>res.redirect</code>. Drop the passthrough.</td>
+      </tr>
+      <tr>
+        <td>Sign-in works, then breaks ~15 min later</td>
+        <td>The refresh token lacks <code>username</code>/<code>role</code>. Sign both tokens with the same payload and rebuild claims from the database on refresh.</td>
+      </tr>
+      <tr>
+        <td>CORS error on the API calls after landing</td>
+        <td>Frontend is not on port 3001, or the origin is missing from <code>enableCors</code> in <code>main.ts</code>. <code>credentials: true</code> forbids a wildcard origin.</td>
+      </tr>
+      <tr>
+        <td>Callback page loads but nothing happens</td>
+        <td>Reading <code>useSearchParams</code> outside a <code>&lt;Suspense&gt;</code> boundary, or the tokens are absent from the query string — check the backend's redirect URL.</td>
+      </tr>
+      <tr>
+        <td><code>invalid_client</code></td>
+        <td>Wrong client ID or secret — often the <code>.env</code> of a different Google Cloud project. Restart the backend after editing <code>.env</code>; it is read once at boot.</td>
+      </tr>
+    </table>
+
+    <h2>8. Verification checklist</h2>
+    <p>Start both servers, then walk this list. Each step proves the one before it worked.</p>
+    <ol class="steps">
+      <li>
+        Backend answers a redirect to Google:
+        <pre><code>curl -s -o /dev/null -D - http://localhost:3000/auth/google | grep -i location</code></pre>
+        Expect <code>Location: https://accounts.google.com/o/oauth2/v2/auth?...</code>
+        carrying your <code>client_id</code> and <code>redirect_uri</code>.
+      </li>
+      <li>Open <code>http://localhost:3001/login</code> and click <strong>Sign in with Google</strong>. The address bar must leave for <code>accounts.google.com</code>.</li>
+      <li>Consent screen shows your <strong>App name</strong> — proof the right project is selected.</li>
+      <li>After consent, you land on <code>:3001/dashboard</code>, and the URL is clean (no tokens visible) thanks to <code>router.replace</code>.</li>
+      <li>The navbar shows your email as the username. In DevTools → Application → Local Storage, both <code>blinto.access_token</code> and <code>blinto.refresh_token</code> are present.</li>
+      <li>In Postgres: <code>SELECT id, "googleId", username, email, password FROM users;</code> — your row has a <code>googleId</code> and a <strong>null</strong> password.</li>
+      <li>Sign out and back in with Google: <strong>no second row</strong> is created (lookup 1 matched).</li>
+      <li>Wait 15 minutes, or clear only the access token, and use the app. It refreshes silently and the username survives — this is the bug from section 5.5 staying fixed.</li>
+    </ol>
+
+    <h2 class="page-break">9. Going to production</h2>
+    <ol class="steps">
+      <li>
+        <strong>Add the real redirect URI.</strong> In the console, add
+        <code>https://api.yourdomain.com/auth/google/callback</code>. Keep the
+        localhost entry so development still works — multiple URIs are fine.
+      </li>
+      <li>
+        <strong>Update the deployed environment:</strong>
+        <code>GOOGLE_CALLBACK_URL</code> to the https URL,
+        <code>FRONTEND_URL</code> to your real frontend origin, and
+        <code>NEXT_PUBLIC_API_URL</code> to the real API origin.
+      </li>
+      <li>
+        <strong>Widen CORS</strong> in <code>main.ts</code> to include the
+        production frontend origin. With <code>credentials: true</code> you must
+        list origins explicitly; <code>*</code> is rejected by browsers.
+      </li>
+      <li>
+        <strong>Publish the app</strong> (Audience → Publish). Because
+        <code>email</code> and <code>profile</code> are non-sensitive scopes,
+        this needs no Google verification review, and the test-user restriction
+        disappears.
+      </li>
+      <li>
+        <strong>Set <code>NODE_ENV=production</code></strong> so the cookies are
+        flagged <code>secure</code>, and serve everything over https.
+      </li>
+      <li>
+        <strong>Rotate every secret</strong> that has ever been committed —
+        client secret, both JWT secrets, the database password. Assume anything
+        in git history is public.
+      </li>
+      <li>
+        <strong>Turn off <code>synchronize: true</code></strong> in the TypeORM
+        config and move to migrations. Left on, it will alter or drop production
+        columns to match your entities.
+      </li>
+      <li>
+        <strong>Consider moving auth to httpOnly cookies</strong> (section 6.3)
+        so tokens are no longer reachable from JavaScript.
+      </li>
+    </ol>
+
+    <div class="good">
+      <span class="label">The one-line summary.</span> Google proves
+      <em>who</em> the person is; your backend decides <em>what</em> they can do
+      and issues its own tokens to say so. Everything above is plumbing between
+      those two facts.
+    </div>
+
+    <p class="meta" style="margin-top: 26px; border-top: 1px solid var(--line); padding-top: 10px;">
+      Blinto — Google Sign-In setup guide · source:
+      <code>docs/google-oauth-setup.html</code>
+    </p>
+  </body>
+</html>
